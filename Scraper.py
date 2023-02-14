@@ -4,25 +4,23 @@ from bs4 import BeautifulSoup
 from itertools import zip_longest
 
 class JobScrape:
-
+    '''     Scraping Data Analysis Jobs using BeautifulSoup '''
 
     def __init__(self):
-
-
         self.result=None
         self.job_title = []
         self.company_name = []
         self.links=[]
         self.description=[]
+        self.KEY_SKILLS=[]
 
     def saveandpasre(self):
-        # fetch the url using request
+        # fetching the url using request
         self.result = requests.get(
             "https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords=Data+Analysis&txtLocation=")
-
         src=self.result.content
 
-        # find the elements containing data that we need
+        # findind the elements containing data that we need
         soup = BeautifulSoup(src, 'html.parser')
         job_titles=soup.find_all("h2")
         company_names = soup.find_all("h3", {"class": "joblist-comp-name"})
@@ -37,19 +35,19 @@ class JobScrape:
                soup=BeautifulSoup(src,'html.parser')
                descriptions=soup.find('div',{"class":"jd-desc job-description-main"})
                self.description.append(descriptions.text.strip())
-        return self.job_title,self.company_name,self.links,self.description
+               KEYSKILLS=soup.find("div",{"class":"jd-sec job-skills clearfix"}).find('div')
+               self.KEY_SKILLS.append(KEYSKILLS.text.strip())
 
-
-
+        return self.job_title,self.company_name,self.links,self.description,self.KEY_SKILLS
 
     def create_csv(self):
         # create csv file to save data
 
-        file_list=[self.job_title,self.company_name,self.links,self.description]
+        file_list=[self.job_title,self.company_name,self.links,self.description,self.KEY_SKILLS]
         exported=zip_longest(*file_list)
         with open("JobsDetails.csv","w") as csvfile:
                write=csv.writer(csvfile)
-               write.writerow(["Job Title","Company Name","links",'description'])
+               write.writerow(["Job Title","Company Name","links",'description','Key Skills'])
                write.writerows(exported)
 
         return "Done"
@@ -57,6 +55,6 @@ class JobScrape:
 
 if __name__ == '__main__':
     Job=JobScrape()
-    print(Job.saveandpasre())
+    # print(Job.saveandpasre())
     print(Job.create_csv())
 
